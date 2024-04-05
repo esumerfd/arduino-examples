@@ -1,6 +1,3 @@
-[submodule "libraries/Servo"]
-	path = libraries/Servo
-	url = git@github.com:arduino-libraries/Servo.git
 [submodule "esp32-cam-webserver"]
 	path = esp32-cam-webserver
 	url = git@github.com:easytarget/esp32-cam-webserver.git
