@@ -8,7 +8,6 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX 600
 
 uint8_t servonum = 0;
-uint8_t numberOfServos = 1;
 
 void setup() {
   Log::begin();
@@ -16,24 +15,35 @@ void setup() {
   pwm.begin();
   pwm.setPWMFreq(60);
   delay(10);
+
+  pinMode(33, OUTPUT);
+  digitalWrite(33, HIGH);
 }
 
 void loop() {
-  Log::println("loop: servonum %d", servonum);
+  Log::println("Start movement");
+
+  flash();
 
   for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++){
     pwm.setPWM(servonum, 0, pulselen);
   }
-  delay(500);
+
+  flash();
 
   for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--){
     pwm.setPWM(servonum, 0, pulselen);
   }
+  Log::println("Done");
+  flash();
+}
 
-  delay(500);
-  
-  servonum ++;
-  if (servonum > numberOfServos-1) 
-     servonum = 0;
+void flash() {
+  for (int flashCount = 0; flashCount < 10; flashCount++) {
+    digitalWrite(33, LOW);
+    delay(100);
+    digitalWrite(33, HIGH);
+    delay(100);
+  }
 }
 
