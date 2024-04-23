@@ -1,5 +1,6 @@
 #include <ESP32Servo.h>
 #include <logging.h>
+#include <flash.h>
 
 Servo myservo;
 
@@ -21,6 +22,7 @@ int servoPin = 12;
 
 void setup() {
   Log::begin();
+  Flash::begin();
 
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
@@ -38,11 +40,13 @@ void loop() {
     delay(10);
   }
   Log::println(".");
+  Flash::flash();
 
   for (pos = 180; pos >= 0; pos -= 1) {
     myservo.write(pos);
     delay(10);
   }
   Log::println(".");
+  Flash::flash();
 }
 

@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <logging.h>
+#include <flash.h>
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -11,15 +12,13 @@ uint8_t servonum = 0;
 
 void setup() {
   Log::begin();
+  Flash::begin();
 
   pwm.begin();
   pwm.setPWMFreq(60);
   delay(10);
 
-  pinMode(33, OUTPUT);
-  digitalWrite(33, HIGH);
-
-  flash();
+  Flash::flash();
 }
 
 void loop() {
@@ -29,21 +28,11 @@ void loop() {
     pwm.setPWM(servonum, 0, pulselen);
   }
 
-  flash();
+  Flash::flash();
 
   for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--){
     pwm.setPWM(servonum, 0, pulselen);
   }
   Log::println("Done");
-  flash();
+  Flash::flash();
 }
-
-void flash() {
-  for (int flashCount = 0; flashCount < 10; flashCount++) {
-    digitalWrite(33, LOW);
-    delay(100);
-    digitalWrite(33, HIGH);
-    delay(100);
-  }
-}
-
