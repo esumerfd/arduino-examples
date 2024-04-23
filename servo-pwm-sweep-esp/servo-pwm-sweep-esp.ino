@@ -18,12 +18,12 @@ void setup() {
 
   pinMode(33, OUTPUT);
   digitalWrite(33, HIGH);
+
+  flash();
 }
 
 void loop() {
   Log::println("Start movement");
-
-  flash();
 
   for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++){
     pwm.setPWM(servonum, 0, pulselen);
