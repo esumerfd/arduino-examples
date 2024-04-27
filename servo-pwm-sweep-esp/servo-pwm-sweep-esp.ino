@@ -24,15 +24,21 @@ void setup() {
 void loop() {
   Log::println("Start movement");
 
-  for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++){
+  for (int pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++){
     pwm.setPWM(servonum, 0, pulselen);
+    delay(100);
   }
 
-  Flash::flash();
+  delay(1000);
+  Flash::flash(1);
 
-  for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--){
+  for (int pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--){
     pwm.setPWM(servonum, 0, pulselen);
+    delay(100);
   }
+
+  Flash::flash(1);
+  delay(1000);
+
   Log::println("Done");
-  Flash::flash();
 }
