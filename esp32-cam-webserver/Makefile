@@ -1,0 +1,43 @@
+# Input the serial port using an environment variable.
+SELECTED_SERIAL_PORT=$(if $(SERIAL_PORT), $(SERIAL_PORT), notset)
+SELECTED_PROJECT:=.
+
+FQBN=esp32:esp32:esp32cam
+
+default: build
+
+init: config board dependencies
+
+config:
+	@cd $(SELECTED_PROJECT) \
+		&& arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+
+board:
+	@cd $(SELECTED_PROJECT) \
+		&& arduino-cli core update-index \
+		&& arduino-cli core install esp32:esp32
+dependencies:
+	@cd $(SELECTED_PROJECT) \
+		&& arduino-cli lib install "Adafruit BusIO" \
+		&& arduino-cli lib install "Adafruit PWM Servo Driver Library"
+
+build:
+	@cd $(SELECTED_PROJECT) \
+		&& arduino-cli compile --build-path gen --fqbn $(FQBN) --libraries libraries .
+
+upload:
+ifeq ($(SELECTED_SERIAL_PORT),notset)
+	@echo "Pass in serial port: SERIAL_PORT=xxx make upload"
+else
+	@cd $(SELECTED_PROJECT) \
+		&& arduino-cli upload --build-path gen --port $(SELECTED_SERIAL_PORT) --fqbn $(FQBN) .
+endif
+
+monitor:
+	arduino-cli monitor --port $(SELECTED_SERIAL_PORT)
+
+usb:
+	@cd $(SELECTED_PROJECT) \
+		&& arduino-cli board list \
+		&& ioreg -p IOUSB
+

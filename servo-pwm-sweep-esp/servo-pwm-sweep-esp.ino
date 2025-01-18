@@ -26,19 +26,17 @@ void loop() {
 
   for (int pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++){
     pwm.setPWM(servonum, 0, pulselen);
-    delay(100);
+    delay(10);
   }
 
-  delay(1000);
-  Flash::flash(1);
+  Flash::flash();
 
   for (int pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--){
     pwm.setPWM(servonum, 0, pulselen);
-    delay(100);
+    delay(10);
   }
 
-  Flash::flash(1);
-  delay(1000);
+  Flash::flash();
 
   Log::println("Done");
 }
