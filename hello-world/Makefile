@@ -20,7 +20,7 @@ build:
 	@cd $(SELECTED_PROJECT) \
 		&& arduino-cli compile --build-path gen --fqbn $(FQBN) --libraries libraries .
 
-upload:
+upload: build
 ifeq ($(SELECTED_SERIAL_PORT),notset)
 	@echo "Pass in serial port: SERIAL_PORT=xxx make upload"
 else
