@@ -1,0 +1,6 @@
+[submodule "libraries/SdFat"]
+	path = libraries/SdFat
+	url = ./libraries/SdFat
+[submodule "libraries/Adafruit_TestBed"]
+	path = libraries/Adafruit_TestBed
+	url = ./libraries/Adafruit_TestBed
