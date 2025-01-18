@@ -1,3 +1,6 @@
+#ifndef FLASH_H
+#define FLASH_H
+
 #define ESP_LED_PIN 33
 
 class Flash {
@@ -20,3 +23,5 @@ class Flash {
       }
     }
 };
+
+#endif
