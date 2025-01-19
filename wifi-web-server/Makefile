@@ -23,7 +23,7 @@ dependencies:
 
 build:
 	@cd $(SELECTED_PROJECT) \
-		&& arduino-cli compile --build-path gen --fqbn $(FQBN) --libraries libraries --build-property build.extra_flags="-D ESP32"  .
+		&& arduino-cli compile --build-path gen --fqbn $(FQBN) --libraries libraries --build-property build.extra_flags="-DESP32 -Og -DCONFIG_COMPILER_CXX_EXCEPTIONS=y"  .
 
 upload: build
 ifeq ($(SELECTED_SERIAL_PORT),notset)
