@@ -18,11 +18,12 @@ board:
 		&& arduino-cli core install esp32:esp32
 dependencies:
 	@cd $(SELECTED_PROJECT) \
-		&& arduino-cli lib install "Arducam_Mega"
+		&& arduino-cli lib install "WifiWebServer" \
+		&& arduino-cli lib install "WiFiEspAT"
 
 build:
 	@cd $(SELECTED_PROJECT) \
-		&& arduino-cli compile --build-path gen --fqbn $(FQBN) --libraries libraries .
+		&& arduino-cli compile --build-path gen --fqbn $(FQBN) --libraries libraries --build-property build.extra_flags="-D ESP32"  .
 
 upload: build
 ifeq ($(SELECTED_SERIAL_PORT),notset)
@@ -39,7 +40,6 @@ else
 	@cd $(SELECTED_PROJECT) \
 		&& arduino-cli monitor --port $(SELECTED_SERIAL_PORT)
 endif
-
 
 usb:
 	@cd $(SELECTED_PROJECT) \

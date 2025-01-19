@@ -18,7 +18,9 @@ board:
 		&& arduino-cli core install esp32:esp32
 dependencies:
 	@cd $(SELECTED_PROJECT) \
-		&& arduino-cli lib install "Arducam_Mega"
+		&& arduino-cli lib install "ArduinoHttpServer" \
+		&& arduino-cli lib install "Base64" \
+		&& arduino-cli lib install "WiFi"
 
 build:
 	@cd $(SELECTED_PROJECT) \
@@ -39,7 +41,6 @@ else
 	@cd $(SELECTED_PROJECT) \
 		&& arduino-cli monitor --port $(SELECTED_SERIAL_PORT)
 endif
-
 
 usb:
 	@cd $(SELECTED_PROJECT) \
