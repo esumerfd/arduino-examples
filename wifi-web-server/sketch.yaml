@@ -1,0 +1,10 @@
+default_profile: esp32cam
+default_port: /dev/cu.usbserial-A50285BI
+
+profiles:
+  esp32cam:
+    platforms:
+      - platform: esp32:esp32 (3.1.1)
+    libraries:
+      - WifiWebServer (1.10.1)
+      - WiFiEspAt (1.5.0)

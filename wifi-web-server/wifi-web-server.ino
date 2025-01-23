@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  HelloServer.ino - Simple Arduino web server sample for SAMD21 running WiFiNINA shield
+  WebServer.ino - Simple Arduino web server sample for SAMD21 running WiFiNINA shield
   For any WiFi shields, such as WiFiNINA W101, W102, W13x, or custom, such as ESP8266/ESP32-AT, Ethernet, etc
 
   WiFiWebServer is a library for the ESP32-based WiFi shields to run WebServer
@@ -7,92 +7,47 @@
   Based on  and modified from Arduino WiFiNINA library https://www.arduino.cc/en/Reference/WiFiNINA
   Built by Khoi Hoang https://github.com/khoih-prog/WiFiWebServer
   Licensed under MIT license
- ***************************************************************************************************************************************/
 
+  A simple web server that shows the value of the analog input pins via a web page using an ESP8266 module.
+  This sketch will start an access point and print the IP address of your ESP8266 module to the Serial monitor.
+  From there, you can open that address in a web browser to display the web page.
+  The web page will be automatically refreshed each 20 seconds.
+
+  For more details see: http://yaab-arduino.blogspot.com/p/wifiesp.html
+ ***************************************************************************************************************************************/
 #include "defines.h"
 
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 int reqCount = 0;                // number of requests received
 
-WiFiWebServer server(80);
+WiFiServer server(80);
 
-#if defined(LED_BUILTIN)
-  const int led =  LED_BUILTIN;
-#else
-  #if (ESP32)
-    // Using pin 13 will crash ESP32_C3
-    const int led =  2;
-  #else
-    const int led =  13;
-  #endif
-#endif
-
-void handleRoot()
+void printWifiStatus()
 {
-#define BUFFER_SIZE     512
+  // print the SSID of the network you're attached to:
+  // you're connected now, so print out the data
+  Serial.print(F("You're connected to the network, IP = "));
+  Serial.println(WiFi.localIP());
 
-  digitalWrite(led, 1);
-  char temp[BUFFER_SIZE];
-  int sec = millis() / 1000;
-  int min = sec / 60;
-  int hr = min / 60;
-  int day = hr / 24;
+  Serial.print(F("SSID: "));
+  Serial.print(WiFi.SSID());
 
-  snprintf(temp, BUFFER_SIZE - 1,
-           "<html>\
-<head>\
-<meta http-equiv='refresh' content='5'/>\
-<title>%s</title>\
-<style>\
-body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
-</style>\
-</head>\
-<body>\
-<h1>Hello from %s</h1>\
-<h3>running WiFiWebServer</h3>\
-<h3>on %s</h3>\
-<p>Uptime: %d d %02d:%02d:%02d</p>\
-</body>\
-</html>", BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
-
-  server.send(200, F("text/html"), temp);
-  digitalWrite(led, 0);
-}
-
-void handleNotFound()
-{
-  digitalWrite(led, 1);
-
-  String message = F("File Not Found\n\n");
-
-  message += F("URI: ");
-  message += server.uri();
-  message += F("\nMethod: ");
-  message += (server.method() == HTTP_GET) ? F("GET") : F("POST");
-  message += F("\nArguments: ");
-  message += server.args();
-  message += F("\n");
-
-  for (uint8_t i = 0; i < server.args(); i++)
-  {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-
-  server.send(404, F("text/plain"), message);
-
-  digitalWrite(led, 0);
+  // print the received signal strength:
+  int32_t rssi = WiFi.RSSI();
+  Serial.print(F(", Signal strength (RSSI):"));
+  Serial.print(rssi);
+  Serial.println(F(" dBm"));
 }
 
 void setup()
 {
-  // Open serial communications and wait for port to open:
   Serial.begin(9600);
 
   while (!Serial && millis() < 5000);
 
-  Serial.print(F("\nStarting HelloServer on "));
+  Serial.print(F("\nStarting WebServer on "));
   Serial.print(BOARD_NAME);
-  Serial.print(" with ");
+  Serial.print(F(" with "));
   Serial.println(SHIELD_TYPE);
   Serial.println(WIFI_WEBSERVER_VERSION);
 
@@ -151,24 +106,79 @@ void setup()
     status = WiFi.status();
   }
 
-  //server.begin();
+  printWifiStatus();
 
-  server.on(F("/"), handleRoot);
-
-  server.on(F("/inline"), []()
-  {
-    server.send(200, F("text/plain"), F("This works as well"));
-  });
-
-  server.onNotFound(handleNotFound);
-
+  // start the web server on port 80
   server.begin();
-
-  Serial.print(F("HTTP server started @ "));
-  Serial.println(WiFi.localIP());
 }
 
 void loop()
 {
-  server.handleClient();
+  // listen for incoming clients
+  WiFiClient client = server.available();
+
+  if (client)
+  {
+    Serial.println(F("New client"));
+    // an http request ends with a blank line
+    bool currentLineIsBlank = true;
+
+    while (client.connected())
+    {
+      if (client.available())
+      {
+        char c = client.read();
+        Serial.write(c);
+
+        // if you've gotten to the end of the line (received a newline
+        // character) and the line is blank, the http request has ended,
+        // so you can send a reply
+        if (c == '\n' && currentLineIsBlank)
+        {
+          Serial.println(F("Sending response"));
+
+          // send a standard http response header
+          // use \r\n instead of many println statements to speedup data send
+          client.print(
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/html\r\n"
+            "Connection: close\r\n"  // the connection will be closed after completion of the response
+            "Refresh: 20\r\n"        // refresh the page automatically every 20 sec
+            "\r\n");
+          client.print(F("<!DOCTYPE HTML>\r\n"));
+          client.print(F("<html>\r\n"));
+          client.print(F("<h1>Hello World from "));
+          client.print(BOARD_NAME);
+          client.print(F("!</h1>\r\n"));
+          client.print(F("Requests received: "));
+          client.print(++reqCount);
+          client.print(F("<br>\r\n"));
+          client.print(F("Analog input A0: "));
+          client.print(analogRead(0));
+          client.print(F("<br>\r\n"));
+          client.print(F("</html>\r\n"));
+          break;
+        }
+
+        if (c == '\n')
+        {
+          // you're starting a new line
+          currentLineIsBlank = true;
+        }
+        else if (c != '\r')
+        {
+          // you've gotten a character on the current line
+          currentLineIsBlank = false;
+        }
+      }
+    }
+
+    // give the web browser time to receive the data
+    delay(10);
+
+    // close the connection:
+    client.stop();
+    Serial.println(F("Client disconnected"));
+  }
 }
+
