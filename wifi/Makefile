@@ -33,3 +33,6 @@ usb:
 		&& arduino-cli board list \
 		&& ioreg -p IOUSB
 
+clean:
+	@cd $(SELECTED_PROJECT) \
+		&& rm -rf gen/*
