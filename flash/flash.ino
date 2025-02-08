@@ -4,7 +4,7 @@
 Flasher flasher;
 
 void setup() {
-  flasher.begin(10);
+  flasher.begin(1000);
 }
 
 void loop() {
