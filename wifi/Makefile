@@ -1,12 +1,13 @@
-# Input the serial port using an environment variable.
+# Input # Input the serial port using an environment variable.
 SELECTED_SERIAL_PORT=$(if $(SERIAL_PORT), $(SERIAL_PORT),notset)
-SELECTED_PROJECT:=.
+# Optionally input the project PROJECT=Firmware/SIXpackDebug
+SELECTED_PROJECT:=$(if $(PROJECT), $(PROJECT), .)
 
 FQBN=esp32:esp32:esp32cam
 
 default: build
 
-init: config board 
+init: config board dependencies
 
 config:
 	@cd $(SELECTED_PROJECT) \
@@ -15,19 +16,34 @@ config:
 board:
 	@cd $(SELECTED_PROJECT) \
 		&& arduino-cli core update-index \
-		&& arduino-cli core install esp32:
+		&& arduino-cli core install esp32:esp32
+
+dependencies:
+	@cd $(SELECTED_PROJECT) \
+		# && arduino-cli lib install "Adafruit BusIO" \
+		# && arduino-cli lib install "Adafruit PWM Servo Driver Library"
+
 build:
 	@cd $(SELECTED_PROJECT) \
 		&& arduino-cli compile --build-path gen --profile esp32cam --build-property build.extra_flags="-DESP32 -Og -DCONFIG_COMPILER_CXX_EXCEPTIONS=y"  .
 
+
 upload: build
+ifeq ($(SELECTED_SERIAL_PORT),notset)
+	@echo "Pass in serial port: SERIAL_PORT=xxx make upload"
+else
 	@cd $(SELECTED_PROJECT) \
-		&& arduino-cli upload --build-path gen --profile esp32cam
+		&& arduino-cli upload --build-path gen --port $(SELECTED_SERIAL_PORT) --fqbn $(FQBN) .
+endif
 
 monitor:
+ifeq ($(SELECTED_SERIAL_PORT),notset)
+	@echo "Pass in serial port: SERIAL_PORT=xxx make monitor"
+else
 	@cd $(SELECTED_PROJECT) \
-		&& arduino-cli monitor --profile esp32cam
-
+		&& arduino-cli monitor --port $(SELECTED_SERIAL_PORT)
+endif
+ 
 usb:
 	@cd $(SELECTED_PROJECT) \
 		&& arduino-cli board list \
